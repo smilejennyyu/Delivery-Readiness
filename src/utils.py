@@ -64,7 +64,6 @@ def data_load(data_keys={'oura_sleep', 'birth'}, wave=4):
     """
 
     #List s3 keys
-    # get_matching_s3_keys(bucket, prefix='bump/') #Remove prefix to view non-BUMP data
     bucket = 'fouryouandme-study-data' # for 4YouandMe, Bump, CamCog or Bodyport project
 
     # prefix = {study_name} or {study_name}/{source}
