@@ -210,6 +210,12 @@ def data_load(data_keys={'oura_sleep', 'birth'}, wave=4):
         df_sam = pandas_from_csv_s3(bucket, key=key, compression='gzip')
         df_sam['date'] = pd.to_datetime(df_sam.event_date).dt.date
         dfs['quick_activities'] = df_sam
+    
+    if 'compliance' in data_keys:
+        key = f'bump/app_activities/wave_{wave}/compliance.csv.gz'
+        df_sam = pandas_from_csv_s3(bucket, key=key, compression='gzip')
+        df_sam['date'] = pd.to_datetime(df_sam.event_date).dt.date
+        dfs['compliance'] = df_sam
 
     # Others
     if 'ace' in data_keys:
