@@ -69,6 +69,7 @@ def data_load(data_keys={'oura_sleep', 'birth'}, wave=4):
     # sources: app_activities, bodyport, camcog, garmin, oura, redcap, rescuetime
     # note camcog not accessible to bodyport (and vice a versa)
     key = f'bump/redcap/wave_{wave}/study_ids.csv.gz'
+    matching_keys = get_matching_s3_keys(bucket, prefix=f'bump/redcap/wave_{wave}', suffix='.csv.gz')
     df_studyID = pandas_from_csv_s3(bucket, key=key, compression='gzip')
 
     # put all data in this merged dfs list
@@ -80,11 +81,15 @@ def data_load(data_keys={'oura_sleep', 'birth'}, wave=4):
 
     # Birthing Data
     if 'birth' in data_keys:
-        key = f'bump/redcap/wave_{wave}/birthing_data_cohort_2_only.csv.gz'
+        if f'bump/redcap/wave_{wave}/birthing_data_cohort_2_only.csv.gz' in matching_keys:
+            key = f'bump/redcap/wave_{wave}/birthing_data_cohort_2_only.csv.gz'
+        elif f'bump/redcap/wave_{wave}/birthing_data.csv.gz' in matching_keys:
+            key = f'bump/redcap/wave_{wave}/birthing_data.csv.gz'
         df_birth = pandas_from_csv_s3(bucket, key=key, compression='gzip')
         df_birth['date'] = pd.to_datetime(df_birth.birth_date).dt.date
-        df_birth = pd.merge(df_birth, df_studyID, on='record_id')
-        df_birth['user_id'] = df_birth.evidation_id
+        if 'user_id' not in df_birth.columns:
+            df_birth = pd.merge(df_birth, df_studyID, on='record_id')
+            df_birth['user_id'] = df_birth.evidation_id
 
         # There is a missing value in the birth_date or birth_scheduled, remove them
         df_birth = df_birth.dropna(subset=['birth_date', 'birth_scheduled']).reset_index(drop=True)
